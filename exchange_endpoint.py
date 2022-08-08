@@ -33,6 +33,8 @@ def shutdown_session(response_or_exc):
 
 def check_sig(payload,sig):
     
+    print("Check if signature is valid")
+    
     if payload['platform'] == 'Ethereum':
 
         # Check Ethereum
@@ -147,8 +149,10 @@ def trade():
         #Your code here
         #Note that you can access the database session using g.session
 
-        # TODO: Check the signature
+        print("Begin process")
         
+        # TODO: Check the signature
+
         print(check_sig(payload,sig))
         
         # TODO: Add the order to the database
