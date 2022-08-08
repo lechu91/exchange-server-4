@@ -57,7 +57,7 @@ def check_sig(payload,sig):
             log_message(payload_text)
             return False
 
-def fill_order(order,txes=[]):
+def fill_order(new_order,txes=[]):
     
     #Check if there are any existing orders that match the new order
     orders = session.query(Order).filter(Order.filled == None).all()
@@ -79,7 +79,6 @@ def fill_order(order,txes=[]):
                 break
                     
     if existing_order.buy_amount > new_order.sell_amount:
-        #create order
 
         buy_amount = existing_order.buy_amount - new_order.sell_amount
         sell_amount = existing_order.sell_amount / existing_order.buy_amount * buy_amount
