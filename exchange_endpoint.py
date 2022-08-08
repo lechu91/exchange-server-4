@@ -59,19 +59,19 @@ def check_sig(payload,sig):
         if eth_account.Account.recover_message(eth_encoded_msg, signature=sig) == pk:
             g.session.add(new_order)
             g.session.commit()
-            return jsonify( True )
+            return True
         else:
             log_message(payload_text)
-            return jsonify( False )
+            return False
     else:
         # Check Algorand
         if algosdk.util.verify_bytes(payload_text.encode('utf-8'),sig,pk):
             g.session.add(new_order)
             g.session.commit()
-            return jsonify( True )                      
+            return True                   
         else:
             log_message(payload_text)
-            return jsonify( False )
+            return False
 
 def fill_order(order,txes=[]):
     
@@ -172,9 +172,12 @@ def trade():
         
         # TODO: Check the signature
 
-        print(check_sig(payload,sig))
+        if !check_sig(payload,sig):
+            return jsonify(False)
         
         # TODO: Add the order to the database
+        
+        
         
         # TODO: Fill the order
         
@@ -185,7 +188,25 @@ def trade():
 def order_book():
     #Your code here
     #Note that you can access the database session using g.session
+    
+    a_list = []
+    
+    for row in g.session.query(Order).all():
+        a_dict = {'sender_pk':row.sender_pk,
+                  'receiver_pk':row.receiver_pk,
+                  'buy_currency':row.buy_currency,
+                  'sell_currency':row.sell_currency,
+                  'buy_amount':row.buy_amount,
+                  'sell_amount':row.sell_amount,
+                  'signature': row.signature}
+        
+        a_list.append(a_dict)
+
+    result = {'data' : a_list}
+                   
     return jsonify(result)
+
+
 
 if __name__ == '__main__':
     app.run(port='5002')
