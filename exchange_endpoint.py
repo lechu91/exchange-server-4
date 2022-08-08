@@ -38,19 +38,6 @@ def check_sig(payload,sig):
     payload_text = json.dumps(payload)
     pk = payload.get("sender_pk")
     
-    # Create order
-
-#     order_data = {'sender_pk': payload.get("sender_pk"),
-#                   'receiver_pk': payload.get("receiver_pk"),
-#                   'buy_currency': payload.get("buy_currency"),
-#                   'sell_currency': payload.get("sell_currency"),
-#                   'buy_amount': payload.get("buy_amount"),
-#                   'sell_amount': payload.get("sell_amount"),
-#                   'signature': sig}
-
-#     new_order_fields = ['sender_pk','receiver_pk','buy_currency','sell_currency','buy_amount','sell_amount','signature']
-#     new_order = Order(**{f:order_data[f] for f in new_order_fields})
-    
     if payload['platform'] == 'Ethereum':
 
         # Check Ethereum
@@ -71,7 +58,10 @@ def check_sig(payload,sig):
 
 def fill_order(order,txes=[]):
     
-    for existing_order in txes:
+    #Check if there are any existing orders that match the new order
+    orders = session.query(Order).filter(Order.filled == None).all()
+    
+    for existing_order in orders:
         
         # Check if currencies match
         if existing_order.buy_currency == new_order.sell_currency and existing_order.sell_currency == new_order.buy_currency:
@@ -190,6 +180,8 @@ def trade():
         g.session.commit()
 
         # TODO: Fill the order
+        
+        fill_order(new_order)
         
         # TODO: Be sure to return jsonify(True) or jsonify(False) depending on if the method was successful
         
