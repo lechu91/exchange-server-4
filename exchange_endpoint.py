@@ -172,17 +172,17 @@ def trade():
         
         # TODO: Check the signature
 
-        if !check_sig(payload,sig):
+        if not check_sig(payload,sig):
             return jsonify(False)
         
         # TODO: Add the order to the database
-        
         
         
         # TODO: Fill the order
         
         # TODO: Be sure to return jsonify(True) or jsonify(False) depending on if the method was successful
         
+        return jsonify(True)
 
 @app.route('/order_book')
 def order_book():
