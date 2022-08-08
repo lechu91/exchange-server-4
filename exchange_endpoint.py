@@ -32,15 +32,90 @@ def shutdown_session(response_or_exc):
 """ Suggested helper methods """
 
 def check_sig(payload,sig):
-    pass
+    
+    if payload['platform'] == 'Ethereum':
+
+        # Check Ethereum
+        eth_encoded_msg = eth_account.messages.encode_defunct(text=payload_text)
+
+        if eth_account.Account.recover_message(eth_encoded_msg, signature=sig) == pk:
+            g.session.add(new_order)
+            g.session.commit()
+            return jsonify( True )
+        else:
+            log_message(payload_text)
+            return jsonify( False )
+    else:
+        # Check Algorand
+        if algosdk.util.verify_bytes(payload_text.encode('utf-8'),sig,pk):
+            g.session.add(new_order)
+            g.session.commit()
+            return jsonify( True )                      
+        else:
+            log_message(payload_text)
+            return jsonify( False )
 
 def fill_order(order,txes=[]):
-    pass
+    
+    for existing_order in txes:
+        
+        # Check if currencies match
+        if existing_order.buy_currency == new_order.sell_currency and existing_order.sell_currency == new_order.buy_currency:
+
+            # Check if exchange rates match
+            if existing_order.sell_amount * new_order.sell_amount >= new_order.buy_amount * existing_order.buy_amount:
+                
+                #If a match is found between order and existing_order do the trade
+                existing_order.filled = datetime.now()
+                new_order.filled = datetime.now()
+                existing_order.counterparty_id = new_order.id
+                new_order.counterparty_id = existing_order.id
+                session.commit()
+                break
+                    
+    if existing_order.buy_amount > new_order.sell_amount:
+        #create order
+
+        buy_amount = existing_order.buy_amount - new_order.sell_amount
+        sell_amount = existing_order.sell_amount / existing_order.buy_amount * buy_amount
+
+        child_data = {'buy_currency': existing_order.buy_currency,
+                       'sell_currency': existing_order.sell_currency,
+                       'buy_amount': buy_amount,
+                       'sell_amount': sell_amount,
+                       'sender_pk': existing_order.sender_pk,
+                       'receiver_pk': existing_order.receiver_pk,
+                       'creator_id': existing_order.id
+                      }
+        
+        child_order = Order(**{f:child_data[f] for f in fields_child})
+        session.add(child_order)
+        session.commit()
+
+    elif new_order.buy_amount > existing_order.sell_amount:
+        #create order
+
+        buy_amount = new_order.buy_amount - existing_order.sell_amount
+        sell_amount = new_order.sell_amount / new_order.buy_amount * buy_amount
+
+        child_data = {'buy_currency': new_order.buy_currency,
+                       'sell_currency': new_order.sell_currency,
+                       'buy_amount': buy_amount,
+                       'sell_amount': sell_amount,
+                       'sender_pk': new_order.sender_pk,
+                       'receiver_pk': new_order.receiver_pk,
+                       'creator_id': new_order.id
+                      }
+        
+        child_order = Order(**{f:child_data[f] for f in fields_child})
+        session.add(child_order)
+        session.commit()
   
 def log_message(d):
     # Takes input dictionary d and writes it to the Log table
     # Hint: use json.dumps or str() to get it in a nice string form
-    pass
+    with open('server_log.txt', 'a') as log_file:
+        log_file.write(json.dumps(d))
 
 """ End of helper methods """
 
@@ -73,6 +148,8 @@ def trade():
         #Note that you can access the database session using g.session
 
         # TODO: Check the signature
+        
+        print(check_sig(payload,sig))
         
         # TODO: Add the order to the database
         
