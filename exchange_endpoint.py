@@ -36,6 +36,7 @@ def check_sig(payload,sig):
     print("Check if signature is valid")
     
     payload_text = json.dumps(payload)
+    pk = payload.get("sender_pk")
     
     if payload['platform'] == 'Ethereum':
 
@@ -153,7 +154,6 @@ def trade():
         
         payload = content.get("payload")
         sig = content['sig']
-        pk = payload.get("sender_pk")
         
         # Create order
         
