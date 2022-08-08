@@ -177,6 +177,20 @@ def trade():
         
         # TODO: Add the order to the database
         
+            # Create order
+
+        order_data = {'sender_pk': payload.get("sender_pk"),
+                      'receiver_pk': payload.get("receiver_pk"),
+                      'buy_currency': payload.get("buy_currency"),
+                      'sell_currency': payload.get("sell_currency"),
+                      'buy_amount': payload.get("buy_amount"),
+                      'sell_amount': payload.get("sell_amount"),
+                      'signature': sig}
+
+        new_order_fields = ['sender_pk','receiver_pk','buy_currency','sell_currency','buy_amount','sell_amount','signature']
+        new_order = Order(**{f:order_data[f] for f in new_order_fields})
+        
+        
         
         # TODO: Fill the order
         
