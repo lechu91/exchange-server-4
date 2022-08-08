@@ -29,6 +29,9 @@ def shutdown_session(response_or_exc):
     g.session.commit()
     g.session.remove()
 
+    
+fields_basic = ['sender_pk','receiver_pk','buy_currency','sell_currency','buy_amount','sell_amount']
+fields_child = ['sender_pk','receiver_pk','buy_currency','sell_currency','buy_amount','sell_amount','creator_id']
 
 """ Suggested helper methods """
 
