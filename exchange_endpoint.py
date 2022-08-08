@@ -35,6 +35,8 @@ def check_sig(payload,sig):
     
     print("Check if signature is valid")
     
+    payload_text = json.dumps(payload)
+    
     if payload['platform'] == 'Ethereum':
 
         # Check Ethereum
